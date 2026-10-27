@@ -1,0 +1,1 @@
+{"name":"flash-hack-key-store-telegram-bot","version":"1.0.0","description":"FLASH HACK KEY STORE Telegram bot with Supabase order lookup","main":"index.js","scripts":{"start":"node index.js"},"engines":{"node":">=20"},"dependencies":{"dotenv":"^16.4.7","node-telegram-bot-api":"^0.66.0","@supabase/supabase-js":"^2.49.1"}}
