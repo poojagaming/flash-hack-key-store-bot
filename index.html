@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLASH KEY STORE - UPI Payment</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: #101827;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .card {
+      max-width: 420px;
+      margin: 35px auto;
+      padding: 26px 20px;
+      border-radius: 20px;
+      background: #1d293b;
+      text-align: center;
+      box-shadow: 0 12px 35px #0005;
+    }
+    .logo { font-size: 42px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #b8c4d8; line-height: 1.5; }
+    .amount {
+      font-size: 38px;
+      font-weight: bold;
+      margin: 26px 0;
+    }
+    .button {
+      display: block;
+      padding: 16px;
+      margin: 12px 0;
+      border-radius: 12px;
+      background: #19a768;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 17px;
+    }
+    .copy {
+      width: 100%;
+      padding: 14px;
+      background: #34445c;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    .note {
+      color: #c3cede;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 22px;
+    }
+    .error { color: #ffb6b6; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">🔐</div>
+    <h1>FLASH KEY STORE</h1>
+    <p class="subtitle">सुरक्षित UPI Payment</p>
+
+    <div class="amount" id="amount">₹50.00</div>
+    <p id="plan">Plan: 1 Day</p>
+
+    <a class="button" id="payButton" href="#">💸 Open UPI App</a>
+    <button class="copy" id="copyButton">📋 Copy UPI ID</button>
+
+    <p id="message" class="note">
+      UPI ऐप खुलने पर भुगतान की जानकारी जाँचकर ही पेमेंट करें।
+    </p>
+
+    <p class="note">
+      पेमेंट सफल होने की पुष्टि बैंक/UPI ऐप में करें।
+      केवल स्क्रीनशॉट या UTR मिलने से भुगतान verified नहीं माना जाएगा।
+    </p>
+  </main>
+
+  <script>
+    /*
+      Replace the placeholder below with your own UPI ID.
+      Amount and plan are read from the URL parameters.
+    */
+    const UPI_ID = "YOUR_UPI_ID_HERE";
+    const PAYEE_NAME = "Dinesh Kumar";
+
+    const params = new URLSearchParams(window.location.search);
+    const amount = Number(params.get("am") || "50");
+    const plan = params.get("plan") || "1 Day";
+    const requestedUpi = params.get("pa");
+
+    const allowedPlans = {
+      "1 Day": 50,
+      "3 Days": 150,
+      "7 Days": 300
+    };
+
+    const validPlan = Object.prototype.hasOwnProperty.call(
+      allowedPlans, plan
+    );
+    const validAmount = validPlan && amount === allowedPlans[plan];
+
+    document.getElementById("amount").textContent =
+      validAmount ? "₹" + amount.toFixed(2) : "Invalid amount";
+
+    document.getElementById("plan").textContent =
+      validPlan ? "Plan: " + plan : "Invalid plan";
+
+    const message = document.getElementById("message");
+    const payButton = document.getElementById("payButton");
+    const copyButton = document.getElementById("copyButton");
+
+    if (!validAmount) {
+      payButton.style.display = "none";
+      message.textContent = "गलत प्लान या राशि। Telegram से दोबारा खोलें।";
+      message.className = "note error";
+    } else if (
+      UPI_ID === "dk2337@ibl" ||
+      !UPI_ID.includes("@") ||
+      (requestedUpi && requestedUpi !== UPI_ID)
+    ) {
+      payButton.style.display = "none";
+      message.textContent = "पहले HTML में अपनी सही UPI ID सेट करें।";
+      message.className = "note error";
+    } else {
+      const upiUrl = "upi://pay?" + new URLSearchParams({
+        pa: UPI_ID,
+        pn: PAYEE_NAME,
+        am: amount.toFixed(2),
+        cu: "INR",
+        tn: "FLASH KEY STORE " + plan
+      }).toString();
+
+      payButton.href = upiUrl;
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(UPI_ID);
+          copyButton.textContent = "✅ UPI ID Copied";
+        } catch (_) {
+          message.textContent = "UPI ID: " + UPI_ID;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
